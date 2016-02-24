@@ -8,7 +8,7 @@ import time
 from time import  sleep
 
 
-ser = serial.Serial(port='COM8',
+ser = serial.Serial(port='COM7',
                     baudrate=9600,
                     bytesize=serial.EIGHTBITS,
                     parity=serial.PARITY_NONE,

@@ -6,6 +6,7 @@ import gtk
 import serial
 import time
 
+
 class SendPackage:
 
     def __init__(self):
@@ -16,24 +17,34 @@ class SendPackage:
         self.Interface = interface.get_object('mainWindow')
         self.Interface.show()
 
-        self.myInput = interface.get_object('entryInput')
+        self.mych1 = interface.get_object('entryChannel1')
+        self.mych2 = interface.get_object('entryInput')
         self.myPort = interface.get_object('entryPort')
         self.myStatus = interface.get_object('lbStatus')
 
     def on_mainWindow_destroy(self,widget):
-        self.ser.close()
+        if hasattr(self, 'ser'):
+            if self.ser.isOpen():
+                self.ser.write(chr(120)) #Make sure the wc stops before closing the port
+                self.ser.close()
+        else:
+            print "Serial port has never been created. Terminate the program."
         gtk.main_quit()
 
     def on_btnSend_clicked(self,widget):
-        self.s = self.myInput.get_text()
-        if self.s == 'start':
-            self.ser.write('A')
-        elif self.s == 'stop':
-            self.ser.write('B')
-        elif self.s == 'reverse':
-            self.ser.write('C')
-        else:
-            print 'Command invalid'
+        voltA = float(self.mych1.get_text())
+        voltB = float(self.mych2.get_text())
+        ao = int((voltA-1)*80 + 0.5)
+        bo = int((voltB-1)*80 + 0.5)
+        # self.ser.write(chr(234))
+        # self.ser.write(chr(ao))
+        self.ser.write(chr(bo))
+        # Another way
+        # self.ser.write(234)
+        # self.ser.write(ao)
+        # self.ser.write(bo)
+        print "VoltA = %.2f     VoltB = %.2f" %(voltA, voltB)
+        print "ao = %d          bo = %d" %(ao, bo)
 
     def on_btnConnect_clicked(self,widget):
         self.Port = self.myPort.get_text()
