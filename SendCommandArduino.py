@@ -1,6 +1,6 @@
 """
     Establish serial connection and send some bytes to arduino
-    Send commands to control motor
+    Send commands to control step motor
 """
 
 import serial

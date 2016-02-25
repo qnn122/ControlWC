@@ -1,5 +1,17 @@
-#!/usr/bin/env python
+"""
+Control Wheelchair via serial port.
+User input a pair of value which control 2 channels of the wheelchar.
+Each value should fall in the range between 1(V) and 3.9(V).
+The middle value, 2.5V, causes motor to stop.
 
+Channel 1:
+        Forward                   Backward
+1V  --------------  2.5V  ----------------- 3.9 V
+
+Channel 2:
+        Right                   Left
+1V  --------------  2.5V  ----------------- 3.9 V
+"""
 import pygtk
 pygtk.require("2.0")
 import gtk
@@ -7,11 +19,11 @@ import serial
 import time
 
 
-class SendPackage:
+class SendCommand:
 
     def __init__(self):
         interface = gtk.Builder()
-        interface.add_from_file('SendPackageGUI.glade')
+        interface.add_from_file('Module1_SendCommandGUI.glade')
         interface.connect_signals(self)
 
         self.Interface = interface.get_object('mainWindow')
@@ -36,10 +48,13 @@ class SendPackage:
         voltB = float(self.mych2.get_text())
         ao = int((voltA-1)*80 + 0.5)
         bo = int((voltB-1)*80 + 0.5)
+
+        # Send data
         self.ser.write(chr(234))
         self.ser.write(chr(ao))
         self.ser.write(chr(bo))
 
+        # Display what was sent
         print "VoltA = %.2f     VoltB = %.2f" % (voltA, voltB)
         print "ao = %d          bo = %d" % (ao, bo)
 
@@ -59,7 +74,7 @@ class SendPackage:
         self.myStatus.set_text("CONNECTED")
 
 if __name__ == "__main__":
-    SendPackage()
+    SendCommand()
     gtk.main()
 
 
