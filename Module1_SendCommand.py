@@ -30,7 +30,7 @@ class SendCommand:
         self.Interface.show()
 
         self.mych1 = interface.get_object('entryChannel1')
-        self.mych2 = interface.get_object('entryInput')
+        self.mych2 = interface.get_object('entryChannel2')
         self.myPort = interface.get_object('entryPort')
         self.myStatus = interface.get_object('lbStatus')
 
