@@ -23,6 +23,7 @@ pygtk.require("2.0")
 import gtk
 import serial
 import time
+import gobject
 
 
 class SendCommand:
@@ -38,6 +39,15 @@ class SendCommand:
         self.myPort = interface.get_object('entryPort')
         self.myStatus = interface.get_object('lbStatus')
 
+        self.LeftTick = interface.get_object('txtLeft')
+        self.RightTick = interface.get_object('txtRight')
+
+        self.leftBuffer = self.LeftTick.get_buffer()
+        self.rightBuffer = self.RightTick.get_buffer()
+
+        self.LRSignal = interface.get_object('scaleLR')
+        self.FBSignal = interface.get_object('scaleFB')
+
     def on_mainWindow_destroy(self,widget):
         if hasattr(self, 'ser'):
             if self.ser.isOpen():
@@ -47,7 +57,23 @@ class SendCommand:
             print "Serial port has never been created. Terminate the program."
         gtk.main_quit()
 
+    def on_btnRun_click(self,widget):
+        voltA = float(self.FBSignal.get_value_pos())
+        voltB = float(self.LRSignal.get_value_pos())
+        ao = int((voltA-1)*80 + 0.5)
+        bo = int((voltB-1)*80 + 0.5)
+
+        # Send data
+        self.ser.write(chr(234))
+        self.ser.write(chr(ao))
+        self.ser.write(chr(bo))
+
+        # Display what was sent
+        print "VoltA = %.2f     VoltB = %.2f" % (voltA, voltB)
+        print "ao = %d          bo = %d" % (ao, bo)
+
     def on_btnConnect_clicked(self,widget):
+
         self.Port = self.myPort.get_text()
         self.ser = serial.Serial(port="COM"+self.Port,
                                  baudrate=19200,
@@ -61,6 +87,19 @@ class SendCommand:
         hello = self.ser.read(100)      # read all data from memory (if any)
         print hello
         self.myStatus.set_text("CONNECTED")
+
+        feedback = gobject.timeout_add(1000, self.update_tick()) #timeloop
+
+    def update_tick(self):
+        #get tick value from encoder
+        self.leftSignal = '1'
+        self.rightSignal = '2'
+
+        #update_onscreen
+        self.leftBuffer.insert_at_cursor(self.leftSignal)
+        self.rightBuffer.insert_at_cursor(self.rightSignal)
+
+
 
 if __name__ == "__main__":
     SendCommand()
