@@ -37,26 +37,21 @@ class SendCommand:
     def on_mainWindow_destroy(self,widget):
         if hasattr(self, 'ser'):
             if self.ser.isOpen():
-                self.ser.write(chr(120))    # Make sure the wc stops before closing the port
+                self.stopWC()
                 self.ser.close()
         else:
             print "Serial port has never been created. Terminate the program."
         gtk.main_quit()
 
     def on_btnSend_clicked(self,widget):
+        # Take value from edit text ...
         voltA = float(self.mych1.get_text())
         voltB = float(self.mych2.get_text())
-        ao = int((voltA-1)*80 + 0.5)
-        bo = int((voltB-1)*80 + 0.5)
 
-        # Send data
-        self.ser.write(chr(234))
-        self.ser.write(chr(ao))
-        self.ser.write(chr(bo))
+        # And send
+        self.sendPackage('a', voltA)
+        self.sendPackage('b', voltB)
 
-        # Display what was sent
-        print "VoltA = %.2f     VoltB = %.2f" % (voltA, voltB)
-        print "ao = %d          bo = %d" % (ao, bo)
 
     def on_btnConnect_clicked(self,widget):
         self.Port = self.myPort.get_text()
@@ -72,6 +67,25 @@ class SendCommand:
         hello = self.ser.read(100)      # read all data from memory (if any)
         print hello
         self.myStatus.set_text("CONNECTED")
+
+    def sendPackage(self, channel, volt):
+        i = int((volt-1)*80 + 0.5)
+        if self.ser.isOpen():
+            if channel == 'a':
+                self.ser.write(chr(234))        # 234 is the predefined header
+                self.ser.write(chr(i))
+                print channel + ':  "%.2f"' % volt
+            elif channel == 'b':
+                self.ser.write(chr(i))
+                print channel + ':  "%.2f"' % volt
+            else:
+                print 'The selected channel is unidentified. Cannot send commands'
+        else:
+            print 'Serial port is not open. Cannot send commands'
+
+    def stopWC(self):
+        self.sendPackage('a', 2.5)
+        self.sendPackage('b', 2.5)
 
 if __name__ == "__main__":
     SendCommand()
