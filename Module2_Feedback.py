@@ -23,7 +23,6 @@ pygtk.require("2.0")
 import gtk
 import serial
 import time
-import gobject
 
 
 class SendCommand:
@@ -39,14 +38,13 @@ class SendCommand:
         self.myPort = interface.get_object('entryPort')
         self.myStatus = interface.get_object('lbStatus')
 
-        self.LeftTick = interface.get_object('txtLeft')
-        self.RightTick = interface.get_object('txtRight')
+        self.txtLeftTick = interface.get_object('textbufferLeft')
+        self.txtRightTick = interface.get_object('textbufferRight')
 
-        self.leftBuffer = self.LeftTick.get_buffer()
-        self.rightBuffer = self.RightTick.get_buffer()
+        self.LRSignal = interface.get_object('adjustmentLR')
+        self.FBSignal = interface.get_object('adjustmentFB')
 
-        self.LRSignal = interface.get_object('scaleLR')
-        self.FBSignal = interface.get_object('scaleFB')
+        self.btnRun = interface.get_object('btnRun')
 
     def on_mainWindow_destroy(self,widget):
         if hasattr(self, 'ser'):
@@ -57,9 +55,9 @@ class SendCommand:
             print "Serial port has never been created. Terminate the program."
         gtk.main_quit()
 
-    def on_btnRun_click(self,widget):
-        voltA = float(self.FBSignal.get_value_pos())
-        voltB = float(self.LRSignal.get_value_pos())
+    def on_btnRun_clicked(self, widget):
+        voltA = float(self.FBSignal.get_value())
+        voltB = float(self.LRSignal.get_value())
         ao = int((voltA-1)*80 + 0.5)
         bo = int((voltB-1)*80 + 0.5)
 
@@ -71,6 +69,13 @@ class SendCommand:
         # Display what was sent
         print "VoltA = %.2f     VoltB = %.2f" % (voltA, voltB)
         print "ao = %d          bo = %d" % (ao, bo)
+
+        self.read_tick()
+
+    def on_btnStop_clicked(self, widget):
+        self.FBSignal.set_value(2.5)
+        self.LRSignal.set_value(2.5)
+        self.btnRun.clicked()
 
     def on_btnConnect_clicked(self,widget):
 
@@ -87,17 +92,26 @@ class SendCommand:
         hello = self.ser.read(100)      # read all data from memory (if any)
         print hello
         self.myStatus.set_text("CONNECTED")
-
-        feedback = gobject.timeout_add(1000, self.update_tick()) #timeloop
+        self.timeout_handler_id = gtk.timeout_add(200,self.update_tick) #timeloop
 
     def update_tick(self):
+        self.txtLeftTick.set_text('')
+        self.txtRightTick.set_text('')
+
         #get tick value from encoder
-        self.leftSignal = '1'
-        self.rightSignal = '2'
+        self.read_tick()
 
         #update_onscreen
-        self.leftBuffer.insert_at_cursor(self.leftSignal)
-        self.rightBuffer.insert_at_cursor(self.rightSignal)
+        for x in range (0,len(self.ticks)):
+            if x%2==0:
+                self.txtLeftTick.insert_at_cursor(str(ord(self.ticks[x]))+'\n')
+            else:
+                self.txtRightTick.insert_at_cursor(str(ord(self.ticks[x]))+'\n')
+        return gtk.TRUE
+
+    def read_tick(self):
+        self.bytesToRead = self.ser.inWaiting()
+        self.ticks = self.ser.read(self.bytesToRead)
 
 
 
