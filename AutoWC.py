@@ -4,9 +4,11 @@
 Main program
 """
 
-import numpy as np
+import math
 from GetDataSerial import Serial
 from WheelchairModel import WheelchairModel
+
+PI = math.pi
 
 class AutoWC:
 
@@ -25,6 +27,10 @@ class AutoWC:
 
 
     def sendPackage(self, channel, volt):
+        """Send commands to move wheel chair
+        :param channel:
+        :param volt:
+        """
         i = int((volt-1)*80 + 0.5)
         if self.serial.ser.isOpen():
             if channel == 'a':
@@ -40,6 +46,8 @@ class AutoWC:
             print 'Serial port is not open. Cannot send commands'
 
     def stopWC(self):
+        """Stop the wheelchair
+        """
         self.sendPackage('a', 2.5)
         self.sendPackage('b', 2.5)
 
@@ -54,8 +62,8 @@ class AutoWC:
         #if self.serial.ser.inWaiting() > 0:
         self.buffer = self.serial.readPort()  # numbers of ticks of 2 encoders
 
-        LEFT_M_PER_TICK = 2*np.pi*self.wc.R_left/self.wc.encoder_revolution
-        RIGHT_M_PER_TICK = 2*np.pi*self.wc.R_right/self.wc.encoder_revolution
+        LEFT_M_PER_TICK = 2*PI*self.wc.R_left/self.wc.encoder_revolution
+        RIGHT_M_PER_TICK = 2*PI*self.wc.R_right/self.wc.encoder_revolution
         for x in range(0, len(self.buffer)):
             if x % 2 == 0:      # left encoders
                 #self.arrayLeftTicks[x] = str(ord(self.buffer[x]))

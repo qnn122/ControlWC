@@ -32,12 +32,12 @@ class Serial:
                 self.ser.close()
         else:
             print "Serial port has never been created. Terminate the program."
+        self.readPort()
 
 
     def readPort(self):
-        """
-        Read buffer from serial port
-        :return: buffer
+        """Read buffer from serial port
+        :returns buffer: data from serial port
         """
         self.buffer = self.ser.read(self.ser.inWaiting())
         return self.buffer
