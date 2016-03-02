@@ -5,15 +5,18 @@
   <object class="GtkAdjustment" id="adjustmentFB">
     <property name="lower">1</property>
     <property name="upper">3.8999999999999999</property>
+    <property name="value">2.5</property>
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">1</property>
   </object>
   <object class="GtkAdjustment" id="adjustmentLR">
     <property name="lower">1</property>
     <property name="upper">3.8999999999999999</property>
+    <property name="value">2.5</property>
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">1</property>
   </object>
+  <object class="GtkTextBuffer" id="textbufferLeft"/>
   <object class="GtkTextBuffer" id="textbufferRight"/>
   <object class="GtkWindow" id="mainWindow">
     <property name="width_request">800</property>
@@ -352,27 +355,13 @@
                 <property name="n_rows">3</property>
                 <property name="n_columns">3</property>
                 <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
                   <object class="GtkButton" id="btnFoward">
                     <property name="label" translatable="yes">FOWARD</property>
                     <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <signal name="clicked" handler="on_btnFoward_clicked" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -386,6 +375,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <signal name="clicked" handler="on_btnBack_clicked" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -421,6 +411,21 @@
                     <property name="top_attach">1</property>
                     <property name="bottom_attach">2</property>
                   </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
                 </child>
               </object>
               <packing>
@@ -478,5 +483,4 @@
       </object>
     </child>
   </object>
-  <object class="GtkTextBuffer" id="textbufferLeft"/>
 </interface>

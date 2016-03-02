@@ -13,7 +13,7 @@ class Serial:
         self.ser = None
         self.buffer = None
 
-    def openPort(self,COM):
+    def openPort(self, COM):
         self.ser = serial.Serial(port="COM"+COM,
                                  baudrate=19200,
                                  bytesize=serial.EIGHTBITS,
