@@ -92,7 +92,7 @@ class SendCommand:
         hello = self.ser.read(100)      # read all data from memory (if any)
         print hello
         self.myStatus.set_text("CONNECTED")
-        self.timeout_handler_id = gtk.timeout_add(200,self.update_tick) #timeloop
+        self.timeout_handler_id = gtk.timeout_add(200, self.update_tick) #timeloop
 
     def update_tick(self):
         self.txtLeftTick.set_text('')

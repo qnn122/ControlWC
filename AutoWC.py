@@ -13,14 +13,11 @@ PI = math.pi
 class AutoWC:
 
     def __init__(self):
-        self.arrayLeftTicks = None
-        self.sumLeftTicks = None
-        self.arrayRightTicks = None
-        self.sumRightTicks = None
-
         # Set up port for incoming data
         self.serial = Serial()
-        #self.port = self.serial.ser
+
+        self.arrayLeftTicks = None
+        self.arrayRightTicks = None
 
         # Wheelchair model
         self.wc = WheelchairModel()
@@ -64,24 +61,15 @@ class AutoWC:
 
         LEFT_M_PER_TICK = 2*PI*self.wc.R_left/self.wc.encoder_revolution
         RIGHT_M_PER_TICK = 2*PI*self.wc.R_right/self.wc.encoder_revolution
-        for x in range(0, len(self.buffer)):
+        for x in range(len(self.buffer)):
             if x % 2 == 0:      # left encoders
-                #self.arrayLeftTicks[x] = str(ord(self.buffer[x]))
-                # self.sumLeftTicks += ord(buffer[x])
+                self.arrayLeftTicks += str(ord(self.buffer[x]))+'\n'
                 self.wc.d_left += ord(self.buffer[x])*LEFT_M_PER_TICK
             else:               # right encoders
-                #self.arrayRightTicks[x] = str(ord(self.buffer[x]))
-                # self.sumRightTicks += ord(buffer[x])
+                self.arrayRightTicks += str(ord(self.buffer[x]))+'\n'
                 self.wc.d_right += ord(self.buffer[x])*RIGHT_M_PER_TICK
 
         print 'd_left: %.2f\td_right: %.2f' % (self.wc.d_left, self.wc.d_right)
         return self.wc.d_left, self.wc.d_right
 
-    def goFoward(self):
-        self.sendPackage('a', 2)
-        self.sendPackage('b', 2.5)
-
-    def goBack(self):
-        self.sendPackage('a', 3)
-        self.sendPackage('b', 2.5)
 

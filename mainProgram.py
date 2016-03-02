@@ -33,6 +33,9 @@ class mainProgram:
         self.btnRun = interface.get_object('btnRun')
         self.entryDistance = interface.get_object('entryDistance')
 
+        self.cbtnStop = interface.get_object('cbtnStop')
+        self.entryStop = interface.get_object('entryStop')
+
     def on_mainWindow_destroy(self,widget):
         self.autoWC.serial.closePort()
         gtk.mainquit()
@@ -57,25 +60,34 @@ class mainProgram:
 
         self.autoWC.updateTicks()
 
-        #for x in range(0, (len(self.autoWC.buffer)) / 2):
-            #self.txtLeftTick.insert_at_cursor(self.autoWC.arrayLeftTicks[x]+'\n')
-            #self.txtRightTick.insert_at_cursor(self.autoWC.arrayRightTicks[x]+'\n')
+        self.txtLeftTick.insert_at_cursor(self.autoWC.arrayLeftTicks)
+        self.txtRightTick.insert_at_cursor(self.autoWC.arrayRightTicks)
+
         distance = 'd_left: %.2f\td_right: %.2f' % (self.autoWC.wc.d_left, self.autoWC.wc.d_right)
         self.entryDistance.set_text(distance)
 
-        #self.stop_1m()
+        if self.cbtnStop.Active():
+            self.stop_after(ord(self.entryStop.get_text()))
 
         return gtk.TRUE
 
     def on_btnFoward_clicked(self, widget):
-        self.autoWC.goFoward()
+        self.autoWC.sendPackage('a', 2)
+        self.autoWC.sendPackage('b', 2.5)
+
+        self.FBSignal.set_value(2)
+        self.LRSignal.set_value(2.5)
 
     def on_btnBack_clicked(self, widget):
-        self.autoWC.goBack()
+        self.autoWC.sendPackage('a', 3)
+        self.autoWC.sendPackage('b', 2.5)
 
-    def stop_1m(self):
-        d = ord(self.entryDistance.get_text())
-        if d > 1:
+        self.FBSignal.set_value(3)
+        self.LRSignal.set_value(2.5)
+
+    def stop_after(self, distance):
+        d = (self.autoWC.wc.d_left + self.autoWC.wc.d_right) / 2
+        if d > distance:
             self.autoWC.stopWC()
 
 
