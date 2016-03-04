@@ -15,11 +15,11 @@ class Serial:
 
     def openPort(self, COM):
         self.ser = serial.Serial(port="COM"+COM,
-                                 baudrate=19200,
-                                 bytesize=serial.EIGHTBITS,
-                                 parity=serial.PARITY_NONE,
-                                 stopbits=serial.STOPBITS_ONE,
-                                 timeout=1)
+                         baudrate=19200,
+                         bytesize=serial.EIGHTBITS,
+                         parity=serial.PARITY_NONE,
+                         stopbits=serial.STOPBITS_ONE,
+                         timeout=1)
         print(self.ser.name)
         time.sleep(2)                   # Give time for microcontroller to prepare
         self.ser.flush()                # flush all data from memory
@@ -27,13 +27,8 @@ class Serial:
         print hello
 
     def closePort(self):
-        if hasattr(self, 'ser'):
-            if self.ser.isOpen():
-                self.ser.close()
-        else:
-            print "Serial port has never been created. Terminate the program."
-        self.readPort()
-
+        if self.ser.isOpen():
+            self.ser.close()
 
     def readPort(self):
         """Read buffer from serial port
@@ -41,4 +36,3 @@ class Serial:
         """
         self.buffer = self.ser.read(self.ser.inWaiting())
         return self.buffer
-    

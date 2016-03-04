@@ -22,24 +22,24 @@ class AutoWC:
         # Wheelchair model
         self.wc = WheelchairModel()
 
-
     def sendPackage(self, channel, volt):
         """Send commands to move wheel chair
         :param channel:
         :param volt:
         """
         i = int((volt-1)*80 + 0.5)
-        if self.serial.ser.isOpen():
-            if channel == 'a':
-                self.serial.ser.write(chr(234))        # 234 is the predefined header
-                self.serial.ser.write(chr(i))
-                print channel + ':  "%.2f"' % volt
-            elif channel == 'b':
-                self.serial.ser.write(chr(i))
-                print channel + ':  "%.2f"' % volt
-            else:
-                print 'The selected channel is unidentified. Cannot send commands'
-        else:
+        try:
+            if self.serial.ser.isOpen():
+                if channel == 'a':
+                    self.serial.ser.write(chr(234))        # 234 is the predefined header
+                    self.serial.ser.write(chr(i))
+                    print channel + ':  "%.2f"' % volt
+                elif channel == 'b':
+                    self.serial.ser.write(chr(i))
+                    print channel + ':  "%.2f"' % volt
+                else:
+                    print 'The selected channel is unidentified. Cannot send commands'
+        except AttributeError:
             print 'Serial port is not open. Cannot send commands'
 
     def stopWC(self):
@@ -56,7 +56,6 @@ class AutoWC:
         previous_d_right = self.wc.d_right
         previous_d_left = self.wc.d_left
 
-        #if self.serial.ser.inWaiting() > 0:
         self.buffer = self.serial.readPort()  # numbers of ticks of 2 encoders
 
         LEFT_M_PER_TICK = 2*PI*self.wc.R_left/self.wc.encoder_revolution

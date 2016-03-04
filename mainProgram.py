@@ -37,7 +37,10 @@ class mainProgram:
         self.entryStop = interface.get_object('entryStop')
 
     def on_mainWindow_destroy(self,widget):
-        self.autoWC.serial.closePort()
+        try:
+            self.autoWC.serial.closePort()
+        except AttributeError:
+            pass
         gtk.mainquit()
 
     def on_btnRun_clicked(self, widget):
@@ -50,9 +53,12 @@ class mainProgram:
         self.LRSignal.set_value(2.5)
 
     def on_btnConnect_clicked(self,widget):
-        self.autoWC.serial.openPort(self.myPort.get_text())
-        self.myStatus.set_text("CONNECTED")
-        self.timeout_handler_id = gtk.timeout_add(200, self.timer) #timeloop
+        try:
+            self.autoWC.serial.openPort(self.myPort.get_text())
+            self.myStatus.set_text("CONNECTED")
+            self.timeout_handler_id = gtk.timeout_add(200, self.timer) #timeloop
+        except:
+            print   "FAIL"
 
     def timer(self):
         self.txtLeftTick.set_text('')
