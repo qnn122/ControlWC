@@ -13,7 +13,7 @@ class Serial:
         self.ser = None
         self.buffer = None
 
-    def openPort(self, COM):
+    def open_port(self, COM):
         self.ser = serial.Serial(port="COM"+COM,
                          baudrate=19200,
                          bytesize=serial.EIGHTBITS,
@@ -26,11 +26,11 @@ class Serial:
         hello = self.ser.read(100)      # read all data from memory (if any)
         print hello
 
-    def closePort(self):
+    def close_port(self):
         if self.ser.isOpen():
             self.ser.close()
 
-    def readPort(self):
+    def read_port(self):
         """Read buffer from serial port
         :returns buffer: data from serial port
         """

@@ -21,6 +21,11 @@ class WheelchairModel:
         # wc travel distance
         self.d_left = 0
         self.d_right= 0
+        self.d_delta = 0
+
+        #wc latest distance
+        self.p_d_left = 0
+        self.p_d_right = 0
 
         # wheel velocity
         self.vel_left = 0
@@ -28,4 +33,3 @@ class WheelchairModel:
         self.vel_dt = 0
 
         self.delta_t = 0
-

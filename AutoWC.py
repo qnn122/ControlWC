@@ -25,7 +25,7 @@ class AutoWC:
         LEFT_M_PER_TICK = 2*PI*self.wc.R_left/self.wc.encoder_revolution
         RIGHT_M_PER_TICK = 2*PI*self.wc.R_right/self.wc.encoder_revolution
 
-    def sendPackage(self, channel, volt):
+    def send_package(self, channel, volt):
         """Send commands to move wheel chair
         :param channel:
         :param volt:
@@ -45,55 +45,70 @@ class AutoWC:
         except AttributeError:
             print 'Serial port is not open. Cannot send commands'
 
-    def stopWC(self):
+    def stop_wc(self):
         """Stop the wheelchair
         """
-        self.sendPackage('a', 2.5)
-        self.sendPackage('b', 2.5)
+        self.send_package('a', 2.5)
+        self.send_package('b', 2.5)
 
     def update_buffer(self):
         """Update buffer
         """
-        self.buffer = self.serial.readPort()  # numbers of ticks of 2 encoders
+        self.buffer = self.serial.read_port()  # numbers of ticks of 2 encoders
 
-    def get_distance(self):
+    def update_wc_info(self):
         """Get TOTAL distance travelled
         :return:
         """
+        #store old distance
+        self.wc.p_d_left = self.wc.d_left
+        self.wc.p_d_right = self.wc.d_right
+
+        #update distance
         for x in range(len(self.buffer)):
             if x % 2 == 0:      # left encoders
                 self.wc.d_left += ord(self.buffer[x])*LEFT_M_PER_TICK
             else:               # right encoders
                 self.wc.d_right += ord(self.buffer[x])*RIGHT_M_PER_TICK
+        self.wc.d_delta = (self.wc.d_left + self.wc.d_right) / 2
+
+        #update angle
+        self.wc.theta = (self.wc.d_left - self.wc.d_right)/self.wc.L
+
+        #update velocity
+        self.wc.vel_left = (self.wc.d_left - self.wc.p_d_left) / self.wc.delta_t
+        self.wc.vel_right = (self.wc.d_right - self.wc.p_d_right) / self.wc.delta_t
+
+    def get_distance(self):
         return self.wc.d_left, self.wc.d_right
 
     def get_angle(self):
-        """
-        :return:
-        """
-        d_left, d_right = self.get_distance()
-        return (d_left-d_right)/self.wc.L
+        return self.wc.theta
 
     def get_d_delta(self):
-        """
-        :return:
-        """
-        d_left, d_right = self.get_distance()
-        return (d_left + d_right)/2
+        return self.wc.d_delta
 
     def get_velocity(self):
-        # Get latest distance
-        previous_d_left = self.wc.d_left
-        previous_d_right = self.wc_d_right
+        return self.wc.vel_left, self.wc.vel_right
 
-        # Get updated distace
-        d_left, d_right = self.get_distance()
+    def wipe_wc(self):
+        # wc position
+        self.wc.x = 0
+        self.wc.y = 0
+        self.wc.theta = 0
 
-        # Calc velocity
-        vel_left = (d_left - previous_d_left)/self.wc.delta_t
-        vel_right = (d_right - previous_d_right)/self.wc.delta_t
+        # wc travel distance
+        self.wc.d_left = 0
+        self.wc.d_right= 0
+        self.wc.d_delta = 0
 
-        return vel_left, vel_right
+        #wc latest distance
+        self.wc.p_d_left = 0
+        self.wc.p_d_right = 0
 
+        # wheel velocity
+        self.wc.vel_left = 0
+        self.wc.vel_right = 0
+        self.wc.vel_dt = 0
 
 

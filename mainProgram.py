@@ -12,9 +12,9 @@ class mainProgram:
 
     def __init__(self):
         global T
-        T = 200
+        T = 1000
         self.autoWC = AutoWC()
-        self.autoWC.wc.delta_t = T
+        self.autoWC.wc.delta_t = T/1000
 
         interface = gtk.Builder()
         interface.add_from_file('AutoWC_GUI.glade')
@@ -26,14 +26,14 @@ class mainProgram:
         self.myPort = interface.get_object('entryPort')
         self.myStatus = interface.get_object('lbStatus')
 
-        self.txtLeftTick = interface.get_object('textbufferLeft')
-        self.txtRightTick = interface.get_object('textbufferRight')
+        self.txtTicks = interface.get_object('textTicks')
 
         self.LRSignal = interface.get_object('adjustmentLR')
         self.FBSignal = interface.get_object('adjustmentFB')
 
-        self.btnRun = interface.get_object('btnRun')
         self.entryDistance = interface.get_object('entryDistance')
+        self.entryAngle = interface.get_object('entryAngle')
+        self.entryVelocity = interface.get_object('entryVelocity')
 
         self.cbtnStop = interface.get_object('cbtnStop')
         self.entryStop = interface.get_object('entryStop')
@@ -41,63 +41,92 @@ class mainProgram:
 
     def on_mainWindow_destroy(self,widget):
         try:
-            self.autoWC.serial.closePort()
+            self.autoWC.stop_wc()
+            self.autoWC.serial.close_port()
         except AttributeError:
             pass
         gtk.mainquit()
 
     def on_btnRun_clicked(self, widget):
-        self.autoWC.sendPackage('a', self.FBSignal.get_value())
-        self.autoWC.sendPackage('b', self.LRSignal.get_value())
+        self.autoWC.send_package('a', self.FBSignal.get_value())
+        self.autoWC.send_package('b', self.LRSignal.get_value())
 
     def on_btnStop_clicked(self,widget):
-        self.autoWC.stopWC()
+        self.autoWC.stop_wc()
         self.FBSignal.set_value(2.5)
         self.LRSignal.set_value(2.5)
 
     def on_btnConnect_clicked(self,widget):
         try:
-            self.autoWC.serial.openPort(self.myPort.get_text())
+            self.autoWC.serial.open_port(self.myPort.get_text())
             self.myStatus.set_text("CONNECTED")
             self.timeout_handler_id = gtk.timeout_add(T, self.timer) #timeloop
         except:
-            print   "FAIL"
+            print "FAIL"
 
     def timer(self):
-        self.txtLeftTick.set_text('')
-        self.txtRightTick.set_text('')
+        self.txtTicks.set_text('')
 
         self.autoWC.update_buffer()
+        self.autoWC.update_wc_info()
 
-        self.txtLeftTick.insert_at_cursor(self.autoWC.arrayLeftTicks)
-        self.txtRightTick.insert_at_cursor(self.autoWC.arrayRightTicks)
+        for x in range (1,len(self.autoWC.buffer)):
+            if x%2==0:
+                self.txtTicks.insert_at_cursor(str(ord(self.autoWC.buffer[x]))+'\n')
+            else:
+                self.txtTicks.insert_at_cursor(str(ord(self.autoWC.buffer[x]))+'\t')
 
-        distance = 'd_left: %.2f\td_right: %.2f' % (self.autoWC.wc.d_left, self.autoWC.wc.d_right)
+        self.d_left, self.d_right  = self.autoWC.get_distance()
+        distance = 'd_left: %.2f\td_right: %.2f' % (self.d_left, self.d_right)
         self.entryDistance.set_text(distance)
 
-        if self.cbtnStop.Active():
-            self.stop_after(ord(self.entryStop.get_text()))
+        self.vel_left, self.vel_right = self.autoWC.get_velocity()
+        velocity = 'v_left: %.2f\tv_right: %.2f' % (self.vel_left, self.vel_right)
+        self.entryVelocity.set_text(velocity)
+
+        self.entryAngle.set_text(str(self.autoWC.get_angle()))
+
+        if self.cbtnStop.get_active() and self.entryStop.get_text() != '':
+            self.stop_after(int(self.entryStop.get_text()))
+
+        if self.vel_left == 0 and  self.vel_right == 0:
+            self.autoWC.wipe_wc()
 
         return gtk.TRUE
 
     def on_btnFoward_clicked(self, widget):
-        self.autoWC.sendPackage('a', 2)
-        self.autoWC.sendPackage('b', 2.5)
+        self.autoWC.send_package('a', 2)
+        self.autoWC.send_package('b', 2.5)
 
         self.FBSignal.set_value(2)
         self.LRSignal.set_value(2.5)
 
     def on_btnBack_clicked(self, widget):
-        self.autoWC.sendPackage('a', 3)
-        self.autoWC.sendPackage('b', 2.5)
+        self.autoWC.send_package('a', 3)
+        self.autoWC.send_package('b', 2.5)
 
         self.FBSignal.set_value(3)
         self.LRSignal.set_value(2.5)
 
+    def on_btnLeft_clicked(self, widget):
+        self.autoWC.send_package('a', 2.5)
+        self.autoWC.send_package('b', 3)
+
+        self.FBSignal.set_value(2.5)
+        self.LRSignal.set_value(3)
+
+
+    def on_btnRight_clicked(self, widget):
+        self.autoWC.send_package('a', 2.5)
+        self.autoWC.send_package('b', 2)
+
+        self.FBSignal.set_value(2.5)
+        self.LRSignal.set_value(2)
+
+
     def stop_after(self, distance):
-        d = (self.autoWC.wc.d_left + self.autoWC.wc.d_right) / 2
-        if d > distance:
-            self.autoWC.stopWC()
+        if self.autoWC.wc.d_delta > distance:
+            self.autoWC.stop_wc()
 
 
 if __name__ == "__main__":
