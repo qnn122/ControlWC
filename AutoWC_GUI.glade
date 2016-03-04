@@ -16,7 +16,6 @@
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">1</property>
   </object>
-  <object class="GtkTextBuffer" id="textbufferRight"/>
   <object class="GtkWindow" id="mainWindow">
     <property name="width_request">800</property>
     <property name="height_request">400</property>
@@ -260,33 +259,12 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkVPaned" id="vpaned3">
+                  <object class="GtkTextView" id="textview1">
+                    <property name="width_request">200</property>
+                    <property name="height_request">100</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <child>
-                      <object class="GtkLabel" id="lbLeftTick">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">LEFT WHEEL</property>
-                      </object>
-                      <packing>
-                        <property name="resize">False</property>
-                        <property name="shrink">True</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkTextView" id="txtLeft">
-                        <property name="width_request">50</property>
-                        <property name="height_request">50</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="buffer">textbufferLeft</property>
-                      </object>
-                      <packing>
-                        <property name="resize">False</property>
-                        <property name="shrink">True</property>
-                      </packing>
-                    </child>
+                    <property name="buffer">textTickets</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -295,31 +273,87 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkVPaned" id="vpaned4">
+                  <object class="GtkVBox" id="vbox6">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkLabel" id="lbRightTick">
+                      <object class="GtkHBox" id="hbox8">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">RIGHT WHEEL</property>
+                        <child>
+                          <object class="GtkLabel" id="lbVelocity">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">VELOCITY</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="entryVelocity">
+                            <property name="width_request">100</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="invisible_char">●</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
-                        <property name="resize">False</property>
-                        <property name="shrink">True</property>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkTextView" id="txtRight">
-                        <property name="width_request">50</property>
-                        <property name="height_request">50</property>
+                      <object class="GtkHBox" id="hbox9">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="buffer">textbufferRight</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkLabel" id="lbAngle">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">ANGLE</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="entryAngle">
+                            <property name="width_request">100</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="invisible_char">●</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
-                        <property name="resize">False</property>
-                        <property name="shrink">True</property>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                   </object>
@@ -455,6 +489,7 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="entryDistance">
+                        <property name="width_request">100</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">●</property>
@@ -497,6 +532,7 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="entryStop">
+                        <property name="width_request">100</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">●</property>
@@ -535,5 +571,5 @@
       </object>
     </child>
   </object>
-  <object class="GtkTextBuffer" id="textbufferLeft"/>
+  <object class="GtkTextBuffer" id="textTickets"/>
 </interface>
