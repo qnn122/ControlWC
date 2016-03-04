@@ -11,8 +11,10 @@ from AutoWC import AutoWC
 class mainProgram:
 
     def __init__(self):
-
+        global T
+        T = 200
         self.autoWC = AutoWC()
+        self.autoWC.wc.delta_t = T
 
         interface = gtk.Builder()
         interface.add_from_file('AutoWC_GUI.glade')
@@ -36,6 +38,7 @@ class mainProgram:
         self.cbtnStop = interface.get_object('cbtnStop')
         self.entryStop = interface.get_object('entryStop')
 
+
     def on_mainWindow_destroy(self,widget):
         try:
             self.autoWC.serial.closePort()
@@ -56,7 +59,7 @@ class mainProgram:
         try:
             self.autoWC.serial.openPort(self.myPort.get_text())
             self.myStatus.set_text("CONNECTED")
-            self.timeout_handler_id = gtk.timeout_add(200, self.timer) #timeloop
+            self.timeout_handler_id = gtk.timeout_add(T, self.timer) #timeloop
         except:
             print   "FAIL"
 
@@ -64,7 +67,7 @@ class mainProgram:
         self.txtLeftTick.set_text('')
         self.txtRightTick.set_text('')
 
-        self.autoWC.updateTicks()
+        self.autoWC.update_buffer()
 
         self.txtLeftTick.insert_at_cursor(self.autoWC.arrayLeftTicks)
         self.txtRightTick.insert_at_cursor(self.autoWC.arrayRightTicks)

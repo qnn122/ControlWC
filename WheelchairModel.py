@@ -8,10 +8,10 @@ class WheelchairModel:
         wc_vel_distance: velocity
     """
     def __init__(self):
-        self.wheel_base = 0.52
-        self.R_left = 0.165
+        self.L = 0.52           # Distance between wheels
+        self.R_left = 0.165     # Radius of left wheels
         self.R_right = 0.165
-        self.encoder_revolution = 3200
+        self.encoder_revolution = 3200  # WTF?
 
         # wc position
         self.x = 0
@@ -26,4 +26,6 @@ class WheelchairModel:
         self.vel_left = 0
         self.vel_right = 0
         self.vel_dt = 0
+
+        self.delta_t = 0
 
