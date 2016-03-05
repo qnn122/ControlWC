@@ -1,20 +1,26 @@
-#!/usr/bin/env python
-
-"""
-    This is main program
-"""
+from AutoWC import AutoWC
+from WheelchairModel import WheelchairModel
 import pygtk
 pygtk.require("2.0")
 import gtk
-from AutoWC import AutoWC
 
-class mainProgram:
 
+class MainProgram:
+    """This main class handles UI objects' behaviours
+    """
     def __init__(self):
+        # Time for timer
         global T
         T = 1000
+
+        # For debugging
+        global _debug
+        _debug = True
+
+        # Initialize AutoWC and WheelchairModel
         self.autoWC = AutoWC()
-        self.autoWC.wc.delta_t = T/1000
+        self.wc = WheelchairModel()
+        self.wc.delta_t = T / 1000.
 
         interface = gtk.Builder()
         interface.add_from_file('AutoWC_GUI.glade')
@@ -35,11 +41,15 @@ class mainProgram:
         self.entryAngle = interface.get_object('entryAngle')
         self.entryVelocity = interface.get_object('entryVelocity')
 
-        self.cbtnStop = interface.get_object('cbtnStop')
-        self.entryStop = interface.get_object('entryStop')
+        self.cbtnStop_distance = interface.get_object('cbtnStop_distance')
+        self.cbtnStop_angle = interface.get_object('cbtnStop_angle')
+        self.entryStop_distance = interface.get_object('entryStop_distance')
+        self.entryStop_angle = interface.get_object('entryStop_angle')
 
-
-    def on_mainWindow_destroy(self,widget):
+    ##############################
+    # Window
+    ##############################
+    def on_mainWindow_destroy(self, widget):
         try:
             self.autoWC.stop_wc()
             self.autoWC.serial.close_port()
@@ -47,6 +57,51 @@ class mainProgram:
             pass
         gtk.mainquit()
 
+    ##############################
+    # Timer
+    ##############################
+    def timer(self):
+        # Get data from serial port memory
+        self.autoWC.update_buffer()
+
+        # Update wheelchair info (from the buffer)
+        self.wc.update_wc_info(self.autoWC.buffer)
+
+        # Show numbers of ticks (for debugging)
+        if _debug:
+            self.txtTicks.set_text('')
+            for x in range(1, len(self.autoWC.buffer)):
+                if x % 2 == 0:
+                    self.txtTicks.insert_at_cursor(str(ord(self.autoWC.buffer[x])) + '\n')
+                else:
+                    self.txtTicks.insert_at_cursor(str(ord(self.autoWC.buffer[x])) + '\t')
+
+        # Display distance
+        d_left, d_right = self.wc.get_distance()
+        distance = 'd_left: %.2f\td_right: %.2f' % (d_left, d_right)
+        self.entryDistance.set_text(distance)
+
+        # Display velocity
+        vel_left, vel_right = self.wc.get_velocity()
+        velocity = 'v_left: %.2f\tv_right: %.2f' % (vel_left, vel_right)
+        self.entryVelocity.set_text(velocity)
+
+        # Display angle
+        self.entryAngle.set_text(str(self.wc.get_angle()))
+
+        # Stop if reaches given distance
+        if self.cbtnStop_distance.get_active() and self.entryStop_distance.get_text() != '':
+            self.stop_after_distance(int(self.entryStop_distance.get_text()))
+
+        # Stop if reaches given angle
+        if self.cbtnStop_angle.get_active() and self.entryStop_angle.get_text() != '':
+            self.stop_after_angle(int(self.entryStop_angle.get_text()))
+
+        return gtk.TRUE
+
+    ##############################
+    # Buttons
+    ##############################
     def on_btnRun_clicked(self, widget):
         self.autoWC.send_package('a', self.FBSignal.get_value())
         self.autoWC.send_package('b', self.LRSignal.get_value())
@@ -56,79 +111,72 @@ class mainProgram:
         self.FBSignal.set_value(2.5)
         self.LRSignal.set_value(2.5)
 
+    def on_btnReset_clicked(self,widget):
+        self.wc.wipe_wc()
+
     def on_btnConnect_clicked(self,widget):
+        """Connect to serial port, start Timer
+        """
+        # TODO: better error handling here. Each object (serial port and timer) need a handling for itself
         try:
             self.autoWC.serial.open_port(self.myPort.get_text())
             self.myStatus.set_text("CONNECTED")
-            self.timeout_handler_id = gtk.timeout_add(T, self.timer) #timeloop
+            self.timeout_handler_id = gtk.timeout_add(T, self.timer)    # timeloop
         except:
             print "FAIL"
 
-    def timer(self):
-        self.txtTicks.set_text('')
-
-        self.autoWC.update_buffer()
-        self.autoWC.update_wc_info()
-
-        for x in range (1,len(self.autoWC.buffer)):
-            if x%2==0:
-                self.txtTicks.insert_at_cursor(str(ord(self.autoWC.buffer[x]))+'\n')
-            else:
-                self.txtTicks.insert_at_cursor(str(ord(self.autoWC.buffer[x]))+'\t')
-
-        self.d_left, self.d_right  = self.autoWC.get_distance()
-        distance = 'd_left: %.2f\td_right: %.2f' % (self.d_left, self.d_right)
-        self.entryDistance.set_text(distance)
-
-        self.vel_left, self.vel_right = self.autoWC.get_velocity()
-        velocity = 'v_left: %.2f\tv_right: %.2f' % (self.vel_left, self.vel_right)
-        self.entryVelocity.set_text(velocity)
-
-        self.entryAngle.set_text(str(self.autoWC.get_angle()))
-
-        if self.cbtnStop.get_active() and self.entryStop.get_text() != '':
-            self.stop_after(int(self.entryStop.get_text()))
-
-        if self.vel_left == 0 and  self.vel_right == 0:
-            self.autoWC.wipe_wc()
-
-        return gtk.TRUE
 
     def on_btnFoward_clicked(self, widget):
+        # Send commands to wc
         self.autoWC.send_package('a', 2)
         self.autoWC.send_package('b', 2.5)
 
+        # Re-adjust GUI
         self.FBSignal.set_value(2)
         self.LRSignal.set_value(2.5)
 
     def on_btnBack_clicked(self, widget):
+        # Send commands to wc
         self.autoWC.send_package('a', 3)
         self.autoWC.send_package('b', 2.5)
 
+        # Re-adjust GUI
         self.FBSignal.set_value(3)
         self.LRSignal.set_value(2.5)
 
     def on_btnLeft_clicked(self, widget):
+        # Send commands to wc
         self.autoWC.send_package('a', 2.5)
         self.autoWC.send_package('b', 3)
 
+        # Re-adjust GUI
         self.FBSignal.set_value(2.5)
         self.LRSignal.set_value(3)
 
 
     def on_btnRight_clicked(self, widget):
+        # Send commands to wc
         self.autoWC.send_package('a', 2.5)
         self.autoWC.send_package('b', 2)
 
+        # Re-adjust GUI
         self.FBSignal.set_value(2.5)
         self.LRSignal.set_value(2)
 
-
-    def stop_after(self, distance):
-        if self.autoWC.wc.d_delta > distance:
+    def stop_after_distance(self, distance):
+        if self.wc.d_delta > distance:
             self.autoWC.stop_wc()
+
+    def stop_after_angle(self, angle):
+        if self.wc.theta_sum > angle:
+            self.autoWC.stop_wc()
+
+        # Reset angle
+        self.wc.theta_sum = 0
+
+    # TODO: Add PID to stabilize wheelchair movement. SetPoint: theta = 0
 
 
 if __name__ == "__main__":
-    mainProgram()
+    MainProgram()
     gtk.main()

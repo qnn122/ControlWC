@@ -14,12 +14,12 @@ class Serial:
         self.buffer = None
 
     def open_port(self, COM):
-        self.ser = serial.Serial(port="COM"+COM,
-                         baudrate=19200,
-                         bytesize=serial.EIGHTBITS,
-                         parity=serial.PARITY_NONE,
-                         stopbits=serial.STOPBITS_ONE,
-                         timeout=1)
+        self.ser = serial.Serial(port="COM" + COM,
+                                 baudrate=19200,
+                                 bytesize=serial.EIGHTBITS,
+                                 parity=serial.PARITY_NONE,
+                                 stopbits=serial.STOPBITS_ONE,
+                                 timeout=1)
         print(self.ser.name)
         time.sleep(2)                   # Give time for microcontroller to prepare
         self.ser.flush()                # flush all data from memory
