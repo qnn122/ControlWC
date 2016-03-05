@@ -57,7 +57,6 @@ class WheelchairModel:
 
     def update_wc_info(self, buffer):
         """Get TOTAL distance travelled
-        :return:
         """
         # Get latest (previous) distance
         p_d_left = self.d_left
@@ -74,6 +73,7 @@ class WheelchairModel:
         self.d_delta = (self.d_left + self.d_right) / 2
 
         # Update angle
+        # TODO: theta_sum does not match real angle (way smaller than real)
         self.theta = (self.d_left - self.d_right) / self.L
         self.theta_sum += self.theta
 

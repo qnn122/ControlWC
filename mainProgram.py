@@ -1,5 +1,6 @@
 from AutoWC import AutoWC
 from WheelchairModel import WheelchairModel
+from PID import PID
 import pygtk
 pygtk.require("2.0")
 import gtk
@@ -15,7 +16,16 @@ class MainProgram:
 
         # For debugging
         global _debug
-        _debug = True
+        _debug = False
+
+        # For PID
+        # TODO: Add GUI to tune K
+        global Kp, Ki, Kd
+        Kp = 3.0
+        Ki = 0.4
+        Kd = 1.2
+        self.p = PID(3.0, 0.4, 1.2)
+        self.p.setPoint(0)
 
         # Initialize AutoWC and WheelchairModel
         self.autoWC = AutoWC()
@@ -78,16 +88,18 @@ class MainProgram:
 
         # Display distance
         d_left, d_right = self.wc.get_distance()
-        distance = 'd_left: %.2f\td_right: %.2f' % (d_left, d_right)
+        distance = 'Left: %.2f\tRight: %.2f' % (d_left, d_right)
         self.entryDistance.set_text(distance)
 
         # Display velocity
         vel_left, vel_right = self.wc.get_velocity()
-        velocity = 'v_left: %.2f\tv_right: %.2f' % (vel_left, vel_right)
+        velocity = 'Left: %.2f\tRight: %.2f' % (vel_left, vel_right)
         self.entryVelocity.set_text(velocity)
 
         # Display angle
         self.entryAngle.set_text(str(self.wc.get_angle()))
+        newTheta = self.p.update(self.wc.get_angle())
+        # TODO: somehow adjust analog output using this newTheta
 
         # Stop if reaches given distance
         if self.cbtnStop_distance.get_active() and self.entryStop_distance.get_text() != '':
@@ -117,13 +129,16 @@ class MainProgram:
     def on_btnConnect_clicked(self,widget):
         """Connect to serial port, start Timer
         """
-        # TODO: better error handling here. Each object (serial port and timer) need a handling for itself
         try:
             self.autoWC.serial.open_port(self.myPort.get_text())
             self.myStatus.set_text("CONNECTED")
-            self.timeout_handler_id = gtk.timeout_add(T, self.timer)    # timeloop
         except:
-            print "FAIL"
+            print "FAIL to Connect to Serial Port."
+
+        try:
+            self.timeout_handler_id = gtk.timeout_add(T, self.timer)    # time loop
+        except:
+            print "Timer encounters problems."
 
 
     def on_btnFoward_clicked(self, widget):
@@ -147,21 +162,21 @@ class MainProgram:
     def on_btnLeft_clicked(self, widget):
         # Send commands to wc
         self.autoWC.send_package('a', 2.5)
-        self.autoWC.send_package('b', 3)
+        self.autoWC.send_package('b', 3.2)
 
         # Re-adjust GUI
         self.FBSignal.set_value(2.5)
-        self.LRSignal.set_value(3)
+        self.LRSignal.set_value(3.2)
 
 
     def on_btnRight_clicked(self, widget):
         # Send commands to wc
         self.autoWC.send_package('a', 2.5)
-        self.autoWC.send_package('b', 2)
+        self.autoWC.send_package('b', 1.8)
 
         # Re-adjust GUI
         self.FBSignal.set_value(2.5)
-        self.LRSignal.set_value(2)
+        self.LRSignal.set_value(1.8)
 
     def stop_after_distance(self, distance):
         if self.wc.d_delta > distance:
