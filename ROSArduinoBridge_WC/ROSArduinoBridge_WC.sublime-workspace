@@ -1,0 +1,264 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+		{
+			"contents": "/* Define single-letter commands that will be sent by the PC over the\n   serial link.\n*/\n\n#ifndef COMMANDS_H\n#define COMMANDS_H\n\n#define ANALOG_READ    'a'\n#define GET_BAUDRATE   'b'\n#define PIN_MODE       'c'\n#define DIGITAL_READ   'd'\n#define READ_ENCODERS  'e'\n#define MOTOR_SPEEDS   'm'\n#define PING           'p'\n#define RESET_ENCODERS 'r'\n#define SERVO_WRITE    's'\n#define SERVO_READ     't'\n#define UPDATE_PID     'u'\n#define DIGITAL_WRITE  'w'\n#define ANALOG_WRITE   'x'\n#define LEFT            0\n#define RIGHT           1\n\n#endif\n\n\n",
+			"file": "commands.h",
+			"file_size": 542,
+			"file_write_time": 131084470818754400,
+			"settings":
+			{
+				"buffer_size": 542,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "	#include <Event.h>\n#include <Timer.h>\n\n//Avr-libc library includes\n#include <avr/io.h>\n#include <avr/interrupt.h>\n\nunsigned char ao, flag = 0;\nchar r_count = 0, l_count = 0;\nTimer t;\n\nvoid setup() {\n	Serial.begin(19200);\n	//Config timer\n	//t.every(16.384,timer)\n	// Timer/Counter 1 initialization\n	// Clock source: System Clock\n	// Clock value: 16000.000 kHz\n	// Mode: Fast PWM top=ICR1\n	// OC1A output: Non-Inv.\n	// OC1B output: Non-Inv.\n	// Noise Canceler: Off\n	// Input Capture on Falling Edge\n	// Timer1 Overflow Interrupt: Off\n	// Input Capture Interrupt: Off\n	// Compare A Match Interrupt: Off\n	// Compare B Match Interrupt: Off\n	TCCR1A=0xA2;\n	TCCR1B=0x19;\n	TCNT1H=0x00;\n	TCNT1L=0x00;\n	ICR1H=0x00;     // 250 count\n	ICR1L=0xF9;     // = T of 64 kHz\n	OCR1AH=0x00;    // 125\n	OCR1AL=0x7D;    // Duty cycle = 50%\n	OCR1BH=0x00;    // 125\n	OCR1BL=0x7D;    // Duty cycle 50%\n	\n	sei();\n	\n	//Output pin\n	pinMode(9,OUTPUT);\n	pinMode(10,OUTPUT);\n	//Input pin\n	pinMode(6,INPUT);\n	pinMode(7,INPUT);\n}\n\nvoid loop() {\n	//t.update;\n	if (Serial.available() > 0)\n	{\n		//read the incoming byte:\n		ao = Serial.read();\n	}\n	if(ao < 196) // valid voltage range 1-3.9V\n    {   \n		if(flag == 1)\n		{\n			OCR1A = ao; \n            flag = 0;\n            OCR1B = ao; \n        }\n    }\n	else if(ao == 234)\n	{ // equal 234 set flag\n            flag = 1;\n    } \n}\n\nISR(INT0_vect){\n	if(digitalRead(6) == LOW){ // A lead B\n        l_count++;   \n    }else{\n        l_count--;\n    }\n}\n\nISR(INT1_vect){\n	if(digitalRead(7) == LOW){ // A lead B\n        r_count++;   \n    }else{\n        r_count--;\n    }\n}\n\n// Timer update ticks from encoder\nvoid timer()\n{\n    if(r_count!=0 || l_count !=0){        \n        Serial.write(r_count);  \n        Serial.write(l_count);\n\n        r_count = 0; \n        l_count = 0; \n    }\n}\n",
+			"file": "/home/yong/Downloads/encoder.ino",
+			"file_size": 1782,
+			"file_write_time": 131085387615238711,
+			"settings":
+			{
+				"buffer_size": 1782,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 54.0,
+		"last_filter": "pack",
+		"selected_items":
+		[
+			[
+				"pack",
+				"Preferences: Browse Packages"
+			],
+			[
+				"packa",
+				"Preferences: Browse Packages"
+			]
+		],
+		"width": 485.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/yong/.config/sublime-text-3/Packages/User/Stino/Preferences.stino-settings"
+	],
+	"find":
+	{
+		"height": 0.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "commands.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 542,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								542,
+								542
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/home/yong/Downloads/encoder.ino",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1782,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								444,
+								444
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 357.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.5,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "",
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
